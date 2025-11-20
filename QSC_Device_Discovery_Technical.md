@@ -676,7 +676,7 @@ end
 2. **No Historical Tracking**: No record of device up/down events
 3. **Limited XML Parsing**: Simple pattern matching, not full XML parser
 4. **Fixed Filter Count**: Only 10 filter slots
-5. **Doesn't Work in Emulation Mode** Requires QSC Core 
+5. **Doesn't Work in Emulation Mode With Core on Network** 
 
 ---
 
