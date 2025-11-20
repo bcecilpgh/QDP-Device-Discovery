@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QSC Device Discovery Plugin - User Manual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #c4e34f 0%, #a8d42d 100%);
+            color: #333;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #c4e34f;
+            font-size: 1.8em;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .warning-box {
+            background: #fff4e6;
+            border-left: 4px solid #ff9800;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .success-box {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .button-example {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin: 5px;
+            font-weight: bold;
+        }
+
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .toc {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc li {
+            margin: 10px 0;
+        }
+
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .step {
+            background: white;
+            border: 2px solid #c4e34f;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #c4e34f 0%, #a8d42d 100%);
+            color: #333;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .step-content {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>QSC Device Discovery Plugin</h1>
+            <p>User Manual</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Version 2.0 | Fresh AVL Co.</p>
+        </div>
+
+        <div class="content">
+            <div class="toc">
+                <h2 style="margin-top: 0; border: none;">Table of Contents</h2>
+                <ul>
+                    <li><a href="#overview">1. Overview</a></li>
+                    <li><a href="#features">2. Key Features</a></li>
+                    <li><a href="#installation">3. Installation</a></li>
+                    <li><a href="#interface">4. User Interface</a></li>
+                    <li><a href="#usage">5. How to Use</a></li>
+                    <li><a href="#filters">6. Using Filters</a></li>
+                    <li><a href="#technical">7. Technical Details</a></li>
+                    <li><a href="#troubleshooting">8. Troubleshooting</a></li>
+                    <li><a href="#support">9. Support & Contact</a></li>
+                </ul>
+            </div>
+
+            <section id="overview">
+                <h2>1. Overview</h2>
+                <p>The QSC Device Discovery Plugin is a powerful tool for Q-SYS Designer that automatically discovers and displays all Q-SYS devices on your network. It utilizes the Q-SYS Discovery Protocol (QDP) to passively listen for device announcements broadcast by Q-SYS Cores, I/O Frames, and other network devices.</p>
+                
+                <div class="info-box">
+                    <strong>What is QDP?</strong><br>
+                    Q-SYS Discovery Protocol (QDP) is a method where devices send periodic, one-second multicast UDP packets to announce their presence on the network. This plugin listens for these announcements and displays discovered devices with their hostnames, IP addresses, and part numbers.
+                </div>
+
+                <p>This plugin is ideal for:</p>
+                <ul>
+                    <li>Network administrators managing multiple Q-SYS devices</li>
+                    <li>System integrators during installation and commissioning</li>
+                    <li>Troubleshooting network connectivity issues</li>
+                    <li>Documenting existing Q-SYS installations</li>
+                    <li>Monitoring device availability on the network</li>
+                </ul>
+            </section>
+
+            <section id="features">
+                <h2>2. Key Features</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Automatic Discovery</h4>
+                        <p>Passively listens for QDP announcements on port 2467 to discover all Q-SYS devices on your network segment.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Device Information</h4>
+                        <p>Displays hostname, IP address, and part number for each discovered device.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>10 Filter Slots</h4>
+                        <p>Exclude unwanted devices from results using up to 10 customizable filters.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Real-Time Updates</h4>
+                        <p>Device list updates in real-time as devices are discovered during the scan.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Debug Logging</h4>
+                        <p>Comprehensive debug output for troubleshooting network and discovery issues.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Clean Interface</h4>
+                        <p>Simple, intuitive UI with clear status indicators and organized layout.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="installation">
+                <h2>3. Installation</h2>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Download the Plugin</h3>
+                        <p>Obtain the <code>QSC_Device_Discovery.qplug</code> file from your administrator or download location.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Open Q-SYS Designer</h3>
+                        <p>Launch Q-SYS Designer on your computer and open your design file or create a new one.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Import the Plugin</h3>
+                        <p>Go to <strong>Tools → Show Folder → Plugins</strong> and copy the .qplug file into the Plugins folder. Alternatively, you can drag and drop the .qplug file directly into Q-SYS Designer.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Add to Design</h3>
+                        <p>In the Schematic view, search for "QSC Device Discovery" in the component search box and drag it onto your schematic.</p>
+                    </div>
+                </div>
+
+                <div class="success-box">
+                    <strong>Installation Complete!</strong><br>
+                    The plugin is now ready to use. Double-click the component to open its control panel.
+                </div>
+            </section>
+
+            <section id="interface">
+                <h2>4. User Interface</h2>
+                
+                <h3>Control Elements</h3>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Element</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Scan Network</strong></td>
+                            <td>Button</td>
+                            <td>Initiates a 15-second scan to discover Q-SYS devices on the network</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status</strong></td>
+                            <td>Indicator</td>
+                            <td>Shows current plugin state and scan results</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Discovered Devices</strong></td>
+                            <td>Text Display</td>
+                            <td>Lists all discovered devices with hostname, part number, and IP address</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Filter 1-10</strong></td>
+                            <td>Text Input</td>
+                            <td>Enter text patterns to exclude devices from the results</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Status Indicators</h3>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Color</th>
+                            <th>Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ready to scan</td>
+                            <td>Blue</td>
+                            <td>Plugin is initialized and ready to start scanning</td>
+                        </tr>
+                        <tr>
+                            <td>Scanning for devices...</td>
+                            <td>Blue</td>
+                            <td>Currently listening for QDP announcements</td>
+                        </tr>
+                        <tr>
+                            <td>Scan complete. Found X device(s)</td>
+                            <td>Green</td>
+                            <td>Scan finished successfully</td>
+                        </tr>
+                        <tr>
+                            <td>Error: ...</td>
+                            <td>Red</td>
+                            <td>An error occurred during scanning</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="usage">
+                <h2>5. How to Use</h2>
+
+                <h3>Basic Scanning</h3>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Start the Scan</h4>
+                        <p>Click the <strong>Scan Network</strong> button. The status will change to "Scanning for devices..." and the plugin will begin listening for QDP announcements.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Wait for Discovery</h4>
+                        <p>The scan runs for 15 seconds. Devices typically broadcast QDP announcements every 1 second, so most devices will be discovered within the first few seconds.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>View Results</h4>
+                        <p>As devices are discovered, they appear in the "Discovered Devices" list in real-time. Each entry shows:</p>
+                        <ul>
+                            <li><strong>Number:</strong> Sequential device number</li>
+                            <li><strong>Hostname:</strong> Device name configured in Q-SYS</li>
+                            <li><strong>Part Number:</strong> Device model (e.g., QIO-ML2x2, Core 110f)</li>
+                            <li><strong>IP Address:</strong> Network IP address of the device</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Scan Complete</h4>
+                        <p>After 15 seconds, the scan completes automatically and the status shows the final device count. The UDP socket closes to stop receiving packets.</p>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>Pro Tip:</strong> You can run multiple scans. Each new scan clears the previous results and starts fresh.
+                </div>
+
+                <h3>Example Output</h3>
+                <div class="code-block">
+1. audio-core-main (Core 110f) - 192.168.1.100
+2. sanctuary-io (QIO-ML2x2) - 192.168.1.101
+3. lobby-processor (Core Nano) - 192.168.1.102
+4. video-switch-1 (NV-32-H) - 192.168.1.103
+5. stage-io-left (QIO-ML4i) - 192.168.1.104
+6. stage-io-right (QIO-ML4i) - 192.168.1.105
+                </div>
+            </section>
+
+            <section id="filters">
+                <h2>6. Using Filters</h2>
+
+                <p>Filters allow you to exclude specific devices from the discovered devices list. This is useful for focusing on specific device types or hiding test/development devices.</p>
+
+                <h3>How Filters Work</h3>
+                <ul>
+                    <li><strong>Partial Matching:</strong> Filters match any part of the hostname, IP address, or part number</li>
+                    <li><strong>Case-Insensitive:</strong> "core" matches "Core", "CORE", and "core"</li>
+                    <li><strong>Real-Time:</strong> Results update immediately when you change any filter</li>
+                    <li><strong>Multiple Filters:</strong> A device is excluded if it matches ANY filter</li>
+                </ul>
+
+                <h3>Filter Examples</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Filter Text</th>
+                            <th>What It Excludes</th>
+                            <th>Example Matches</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>192.168.1</code></td>
+                            <td>All devices in the 192.168.1.x subnet</td>
+                            <td>192.168.1.234, 192.168.1.100</td>
+                        </tr>
+                        <tr>
+                            <td><code>test</code></td>
+                            <td>Any device with "test" in its name</td>
+                            <td>test-core, test-qio-ml2x2</td>
+                        </tr>
+                        <tr>
+                            <td><code>QIO</code></td>
+                            <td>All QIO series devices</td>
+                            <td>QIO-ML2x2, QIO-ML4i, QIO-L4o</td>
+                        </tr>
+                        <tr>
+                            <td><code>Core Nano</code></td>
+                            <td>All Core Nano devices</td>
+                            <td>Any device with part number "Core Nano"</td>
+                        </tr>
+                        <tr>
+                            <td><code>.234</code></td>
+                            <td>Devices ending in .234</td>
+                            <td>192.168.1.234, 10.0.0.234</td>
+                        </tr>
+                        <tr>
+                            <td><code>test</code></td>
+                            <td>Any device with "test" anywhere</td>
+                            <td>test-core, audio-test, testing-io</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Using Multiple Filters</h3>
+                <p>You can use up to 10 filters simultaneously. For example:</p>
+                <ul>
+                    <li><strong>Filter 1:</strong> <code>test</code> - Exclude all burn-in test devices</li>
+                    <li><strong>Filter 2:</strong> <code>192.168.1</code> - Exclude subnet 192.168.1.x</li>
+                    <li><strong>Filter 3:</strong> <code>temp</code> - Exclude temporary devices</li>
+                    <li><strong>Filter 4-10:</strong> Leave blank</li>
+                </ul>
+
+                <div class="success-box">
+                    <strong>Best Practice:</strong> Use descriptive naming conventions for your devices to make filtering easier. For example, prefix test devices with "test-" or "dev-" so they can be easily filtered out.
+                </div>
+            </section>
+
+            <section id="technical">
+                <h2>7. Technical Details</h2>
+
+                <h3>Q-SYS Discovery Protocol (QDP)</h3>
+                <p>This plugin implements passive listening for QDP announcements. Here are the technical specifications:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Protocol</td>
+                            <td>UDP</td>
+                        </tr>
+                        <tr>
+                            <td>Multicast Address</td>
+                            <td>224.0.23.175</td>
+                        </tr>
+                        <tr>
+                            <td>Listening Port</td>
+                            <td>2467</td>
+                        </tr>
+                        <tr>
+                            <td>Source Port (from devices)</td>
+                            <td>6504</td>
+                        </tr>
+                        <tr>
+                            <td>Broadcast Interval</td>
+                            <td>~1 second</td>
+                        </tr>
+                        <tr>
+                            <td>Data Format</td>
+                            <td>XML</td>
+                        </tr>
+                        <tr>
+                            <td>Scan Duration</td>
+                            <td>15 seconds</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>XML Packet Structure</h3>
+                <p>QDP packets contain XML data with device information:</p>
+                <div class="code-block">
+&lt;QDP&gt;&lt;device&gt;
+  &lt;n&gt;device-hostname&lt;/n&gt;
+  &lt;type&gt;lcqln&lt;/type&gt;
+  &lt;platform&gt;lcqln&lt;/platform&gt;
+  &lt;part_number&gt;QIO-ML2x2&lt;/part_number&gt;
+  &lt;lan_a_ip&gt;192.168.1.100&lt;/lan_a_ip&gt;
+  &lt;lan_a_mac&gt;00:60:74:xx:xx:xx&lt;/lan_a_mac&gt;
+  ...
+&lt;/device&gt;&lt;/QDP&gt;
+                </div>
+
+                <h3>Network Requirements</h3>
+                <ul>
+                    <li><strong>Same Network Segment:</strong> Plugin must be on the same subnet as target devices or multicast must be routed</li>
+                    <li><strong>Multicast Support:</strong> Network switches must support and forward multicast traffic (IGMP)</li>
+                    <li><strong>Port Availability:</strong> UDP port 2467 must not be blocked or in use by another application</li>
+                    <li><strong>Firewall:</strong> Windows Firewall or network firewall must allow UDP port 2467 inbound</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>Network Segmentation:</strong> If your Q-SYS devices are on a different VLAN or subnet, multicast routing must be configured on your network switches/routers, or the plugin won't receive QDP announcements.
+                </div>
+            </section>
+
+            <section id="troubleshooting">
+                <h2>8. Troubleshooting</h2>
+
+                <h3>No Devices Discovered</h3>
+                <p><strong>Symptoms:</strong> Scan completes but shows "Found 0 devices"</p>
+                <p><strong>Possible Causes and Solutions:</strong></p>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Check Network Connectivity</h4>
+                        <p>Verify that your computer and Q-SYS devices are on the same network segment. Ping a known device IP address to confirm connectivity.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Verify Multicast Support</h4>
+                        <p>Check if your network switch supports IGMP and multicast forwarding. Some switches block multicast traffic by default.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Check Port Availability</h4>
+                        <p>Another application (including Q-SYS Designer itself) may be using port 2467. Close other applications and try again.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Firewall Settings</h4>
+                        <p>Ensure Windows Firewall or antivirus software isn't blocking UDP port 2467. Add an exception if necessary.</p>
+                    </div>
+                </div>
+
+                <h3>Some Devices Missing</h3>
+                <p><strong>Symptoms:</strong> Some known devices don't appear in the list</p>
+                <p><strong>Solutions:</strong></p>
+                <ul>
+                    <li>Check if devices are filtered by any active filters</li>
+                    <li>Verify devices are powered on and connected to the network</li>
+                    <li>Wait a few seconds after device boot before scanning</li>
+                    <li>Some device types may not broadcast QDP announcements</li>
+                </ul>
+
+                <h3>Plugin Error Messages</h3>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Error Message</th>
+                            <th>Cause</th>
+                            <th>Solution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Error: Failed to open UDP port</td>
+                            <td>Port 2467 is already in use</td>
+                            <td>Close other applications using this port or restart Q-SYS Designer</td>
+                        </tr>
+                        <tr>
+                            <td>Error: bind : The requested address is not valid</td>
+                            <td>Network adapter issue</td>
+                            <td>Check network adapter settings and ensure it's connected</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Debug Logging</h3>
+                <p>The plugin includes comprehensive debug logging. To view debug output:</p>
+                <ol>
+                    <li>In Q-SYS Designer, go to <strong>View → Debug Output</strong></li>
+                    <li>Look for messages prefixed with <code>[QSC Discovery]</code></li>
+                    <li>Debug output shows:
+                        <ul>
+                            <li>Socket open/close operations</li>
+                            <li>Received packet details</li>
+                            <li>Parsed device information</li>
+                            <li>Filter operations</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="info-box">
+                    <strong>Need More Help?</strong><br>
+                    If debug logging shows "QDP packet received" messages but devices still don't appear, there may be an XML parsing issue. Contact support with the debug log output.
+                </div>
+            </section>
+
+            <section id="support">
+                <h2>9. Support & Contact</h2>
+
+                <h3>Plugin Information</h3>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><strong>Plugin Name:</strong></td>
+                            <td>QSC Device Discovery</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Version:</strong></td>
+                            <td>2.0</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Author:</strong></td>
+                            <td>Brandon Cecil</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Company:</strong></td>
+                            <td>Fresh AVL Co.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="success-box">
+                    <strong>Feature Requests:</strong> We welcome feedback and feature requests to improve the plugin. Please reach out with your suggestions.
+                </div>
+
+            </section>
+
+            <div class="info-box" style="margin-top: 40px;">
+                <h3 style="margin-top: 0;">Quick Reference Card</h3>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><strong>Start Scan:</strong></td>
+                            <td>Click "Scan Network" button</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Scan Duration:</strong></td>
+                            <td>15 seconds</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Add Filter:</strong></td>
+                            <td>Type text in any Filter 1-10 field</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Clear Filter:</strong></td>
+                            <td>Delete text from filter field</td>
+                        </tr>
+                        <tr>
+                            <td><strong>View Debug:</strong></td>
+                            <td>View → Debug Output in Q-SYS Designer</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 Fresh AVL Co. | QSC Device Discovery Plugin v2.0</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Created by Brandon Cecil</p>
+        </div>
+    </div>
+</body>
+</html>

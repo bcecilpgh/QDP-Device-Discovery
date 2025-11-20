@@ -1,0 +1,471 @@
+--[[
+  QSC Device Discovery Plugin
+  Copyright (c) 2025 Brandon Cecil / Fresh AVL Co.
+  
+  MIT License - https://opensource.org/licenses/MIT
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+  
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+  
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+--]]
+
+PluginInfo = {
+  Name = "Fresh AVL Co.~QSC Device Discovery",
+  Version = "2.0",
+  BuildVersion = "2.0.0",
+  Id = "qsc.device.discovery.2.0",
+  Author = "Brandon Cecil",
+  Description = "Discovers QSC devices on the network via QDP (Q-SYS Discovery Protocol)"
+}
+
+function GetColor(props)
+  return {196, 224, 79}
+end
+
+function GetPrettyName(props)
+  return "QSC Device Discovery"
+end
+
+function GetProperties()
+  local props = {}
+  return props
+end
+
+function RectifyProperties(props)
+  return props
+end
+
+function GetControls(props)
+  local ctrls = {
+    {
+      Name = "scan",
+      ControlType = "Button",
+      ButtonType = "Trigger",
+      Count = 1,
+      UserPin = true,
+      PinStyle = "Input"
+    },
+    {
+      Name = "device_list",
+      ControlType = "Text",
+      Count = 1,
+      UserPin = true,
+      PinStyle = "Output"
+    },
+    {
+      Name = "status",
+      ControlType = "Indicator",
+      IndicatorType = "Status",
+      Count = 1,
+      UserPin = true,
+      PinStyle = "Output"
+    },
+    {
+      Name = "filter",
+      ControlType = "Text",
+      Count = 10,
+      UserPin = true,
+      PinStyle = "Input"
+    }
+  }
+  return ctrls
+end
+
+function GetControlLayout(props)
+  local layout = {}
+  local graphics = {}
+  
+  table.insert(graphics, {
+    Type = "GroupBox",
+    Fill = { 240, 240, 240 },
+    StrokeWidth = 1,
+    Position = { 5, 5 },
+    Size = { 590, 600 }
+  })
+  
+  table.insert(graphics, {
+    Type = "Text",
+    Text = "QSC Device Discovery (QDP)",
+    Font = "Roboto",
+    FontSize = 18,
+    FontStyle = "Bold",
+    HTextAlign = "Center",
+    Position = { 5, 10 },
+    Size = { 590, 30 }
+  })
+  
+  layout["scan"] = {
+    PrettyName = "Scan Network",
+    Style = "Button",
+    Position = { 20, 50 },
+    Size = { 120, 30 },
+    Color = { 0, 120, 215 },
+	Legend = "Scan Network"
+  }
+  
+  layout["status"] = {
+    PrettyName = "Status",
+    Position = { 150, 50 },
+    Size = { 430, 30 },
+	CornerRadius = 2
+  }
+  
+  table.insert(graphics, {
+    Type = "Text",
+    Text = "Discovered Devices:",
+    Font = "Roboto",
+    FontSize = 12,
+    FontStyle = "Bold",
+    Position = { 20, 90 },
+    Size = { 560, 20 },
+	CornerRadius = 2
+  })
+  
+  layout["device_list"] = {
+    PrettyName = "Device List",
+    Style = "Text",
+    Position = { 20, 115 },
+    Size = { 560, 200 },
+    Color = { 255, 255, 255 },
+	CornerRadius = 2
+  }
+  
+  table.insert(graphics, {
+    Type = "Text",
+    Text = "Exclude Filters (partial match on hostname, IP, or part number):",
+    Font = "Roboto",
+    FontSize = 12,
+    FontStyle = "Bold",
+    Position = { 20, 325 },
+    Size = { 560, 20 }
+  })
+  
+  -- Add 10 filter text fields
+  for i = 1, 10 do
+    local y_pos = 345 + ((i - 1) * 25)
+    layout["filter " .. i] = {
+      PrettyName = "Filter " .. i,
+      Style = "Text",
+      Position = { 20, y_pos },
+      Size = { 560, 20 },
+      Color = { 255, 255, 255 },
+	  CornerRadius = 2
+    }
+  end
+  
+  return layout, graphics
+end
+
+if Controls then
+  local discovered_devices = {}
+  local udp_socket = nil
+  local discovery_timer = nil
+  
+  -- Q-SYS Discovery Protocol (QDP)
+  -- Devices send XML announcements FROM port 6504 TO port 2467
+  -- on multicast address 224.0.23.175
+  local DISCOVERY_ADDR = "224.0.23.175"
+  local LISTEN_PORT = 2467
+  
+  -- Debug flag
+  local DEBUG = true
+  
+  function DebugPrint(message)
+    if DEBUG then
+      print("[QSC Discovery] " .. message)
+    end
+  end
+  
+  function UpdateDeviceList()
+    DebugPrint("UpdateDeviceList called")
+    
+    -- Get all filter patterns
+    local filters = {}
+    for i = 1, 10 do
+      local filter_text = Controls.filter[i].String
+      if filter_text and filter_text ~= "" then
+        table.insert(filters, filter_text:lower())
+        DebugPrint("Active filter " .. i .. ": " .. filter_text)
+      end
+    end
+    
+    local list = ""
+    local count = 0
+    local filtered_count = 0
+    
+    for ip, device in pairs(discovered_devices) do
+      local should_exclude = false
+      
+      -- Check if device matches any filter
+      if #filters > 0 then
+        local hostname_lower = device.hostname:lower()
+        local ip_lower = ip:lower()
+        local part_lower = (device.part_number or ""):lower()
+        
+        for _, filter in ipairs(filters) do
+          if string.find(hostname_lower, filter, 1, true) or
+             string.find(ip_lower, filter, 1, true) or
+             string.find(part_lower, filter, 1, true) then
+            should_exclude = true
+            filtered_count = filtered_count + 1
+            DebugPrint(string.format("Filtered out: %s at %s (matched filter: %s)", device.hostname, ip, filter))
+            break
+          end
+        end
+      end
+      
+      -- Only add to list if not filtered
+      if not should_exclude then
+        count = count + 1
+        local display_name = device.hostname
+        if device.part_number then
+          display_name = display_name .. " (" .. device.part_number .. ")"
+        end
+        list = list .. string.format("%d. %s - %s\n", count, display_name, ip)
+        DebugPrint(string.format("Device %d: %s at %s", count, device.hostname, ip))
+      end
+    end
+    
+    if count == 0 and filtered_count == 0 then
+      list = "No devices discovered yet. Click 'Scan Network' to search."
+    elseif count == 0 and filtered_count > 0 then
+      list = string.format("All %d discovered device(s) were filtered out.", filtered_count)
+    end
+    
+    Controls.device_list.String = list
+    DebugPrint(string.format("Device list updated. Displayed: %d, Filtered: %d", count, filtered_count))
+  end
+  
+  function ParseQDPPacket(data)
+    -- QDP packets are XML format
+    -- Example: <QDP><device><n>name</n><lan_a_ip>192.168.1.100</lan_a_ip>...
+    local device_info = {}
+    
+    -- Extract hostname from <n> tag (short tag) or <name> tag
+    local name = string.match(data, "<n>([^<]+)</n>")
+    if not name then
+      name = string.match(data, "<name>([^<]+)</name>")
+    end
+    if name then
+      device_info.hostname = name
+      DebugPrint("Parsed hostname: " .. name)
+    end
+    
+    -- Extract IP from <lan_a_ip> tag
+    local ip = string.match(data, "<lan_a_ip>([^<]+)</lan_a_ip>")
+    if ip and ip ~= "" then
+      device_info.ip = ip
+      DebugPrint("Parsed IP: " .. ip)
+    end
+    
+    -- Extract device type
+    local device_type = string.match(data, "<type>([^<]+)</type>")
+    if device_type then
+      device_info.type = device_type
+      DebugPrint("Parsed type: " .. device_type)
+    end
+    
+    -- Extract part number
+    local part_num = string.match(data, "<part_number>([^<]+)</part_number>")
+    if part_num then
+      device_info.part_number = part_num
+      DebugPrint("Parsed part number: " .. part_num)
+    end
+    
+    return device_info
+  end
+  
+  function StartDiscovery()
+    DebugPrint("=== StartDiscovery called ===")
+    discovered_devices = {}
+    Controls.status.Value = 5 -- Searching
+    Controls.status.String = "Scanning for devices..."
+    UpdateDeviceList()
+    
+    DebugPrint("Setting up QDP listener on port " .. LISTEN_PORT)
+    DebugPrint("Q-SYS devices broadcast XML announcements every ~1 second to multicast " .. DISCOVERY_ADDR)
+    
+    -- Close existing socket if any
+    if udp_socket then
+      pcall(function() udp_socket:Close() end)
+      udp_socket = nil
+    end
+    
+    -- Create UDP socket to listen for QDP packets
+    udp_socket = UdpSocket.New()
+    
+    udp_socket.Data = function(sock, packet)
+      DebugPrint("=== QDP packet received ===")
+      DebugPrint("From: " .. packet.Address .. ":" .. tostring(packet.Port))
+      
+      local data = packet.Data
+      DebugPrint("Packet length: " .. #data .. " bytes")
+      
+      -- Log first 300 chars of packet for debugging
+      if #data > 0 then
+        DebugPrint("Packet content (first 300 chars): " .. string.sub(data, 1, 300))
+      end
+      
+      -- Check if this is a QDP device announcement
+      if string.match(data, "<QDP>") and string.match(data, "<device>") then
+        DebugPrint("Valid QDP device announcement detected")
+        
+        local device_info = ParseQDPPacket(data)
+        
+        -- Use IP from packet or from parsed data
+        local ip = device_info.ip or packet.Address
+        local hostname = device_info.hostname or "QSC Device"
+        
+        -- Add or update discovered device
+        if not discovered_devices[ip] then
+          DebugPrint(string.format("*** NEW DEVICE DISCOVERED: %s at %s ***", hostname, ip))
+          discovered_devices[ip] = {
+            hostname = hostname,
+            type = device_info.type,
+            part_number = device_info.part_number,
+            last_seen = os.time()
+          }
+          UpdateDeviceList()
+        else
+          discovered_devices[ip].last_seen = os.time()
+          DebugPrint("Updated last_seen for " .. ip)
+        end
+      elseif string.match(data, "<QDP>") and string.match(data, "<query_ref>") then
+        DebugPrint("QDP query packet (not a device announcement)")
+      else
+        DebugPrint("Packet does not appear to be a QDP device announcement")
+      end
+    end
+    
+    -- Try to bind to port 2467 to receive QDP announcements
+    DebugPrint(string.format("Attempting to bind to 0.0.0.0:%d", LISTEN_PORT))
+    
+    local success, err = pcall(function()
+      udp_socket:Open("0.0.0.0", LISTEN_PORT)
+    end)
+    
+    DebugPrint(string.format("Bind result: success=%s, err=%s", tostring(success), tostring(err)))
+    
+    if not success then
+      Controls.status.Value = 5 -- Error
+      Controls.status.String = "Error: " .. (err or "Failed to open UDP port")
+      DebugPrint("ERROR: Failed to bind to port " .. LISTEN_PORT .. ": " .. (err or "unknown error"))
+      DebugPrint("Note: Port may be in use by another process or require elevated permissions")
+      return
+    end
+    
+    DebugPrint(string.format("Successfully listening on 0.0.0.0:%d", LISTEN_PORT))
+    DebugPrint("Waiting for QDP announcements (devices broadcast every ~1 second)...")
+    DebugPrint("Listening for 15 seconds...")
+    
+    -- Set timeout to stop scanning after 15 seconds (enough for multiple announcements)
+    if discovery_timer then
+      discovery_timer:Stop()
+    end
+    
+    discovery_timer = Timer.New()
+    discovery_timer.EventHandler = function(timer)
+      timer:Stop()
+      DebugPrint("Discovery timer expired")
+      
+      -- Close the UDP socket to stop receiving packets
+      if udp_socket then
+        DebugPrint("Closing UDP socket...")
+        pcall(function() udp_socket:Close() end)
+        udp_socket = nil
+        DebugPrint("UDP socket closed")
+      end
+      
+      -- Count devices after applying filters
+      local filters = {}
+      for i = 1, 10 do
+        local filter_text = Controls.filter[i].String
+        if filter_text and filter_text ~= "" then
+          table.insert(filters, filter_text:lower())
+        end
+      end
+      
+      local total_count = 0
+      local displayed_count = 0
+      
+      for ip, device in pairs(discovered_devices) do
+        total_count = total_count + 1
+        local should_exclude = false
+        
+        if #filters > 0 then
+          local hostname_lower = device.hostname:lower()
+          local ip_lower = ip:lower()
+          local part_lower = (device.part_number or ""):lower()
+          
+          for _, filter in ipairs(filters) do
+            if string.find(hostname_lower, filter, 1, true) or
+               string.find(ip_lower, filter, 1, true) or
+               string.find(part_lower, filter, 1, true) then
+              should_exclude = true
+              break
+            end
+          end
+        end
+        
+        if not should_exclude then
+          displayed_count = displayed_count + 1
+        end
+      end
+      
+      Controls.status.Value = 0 -- OK
+      Controls.status.String = string.format("Scan complete. Found %d device(s)", displayed_count)
+      DebugPrint(string.format("=== Scan complete. Total discovered: %d, Displayed: %d, Filtered: %d ===", 
+        total_count, displayed_count, total_count - displayed_count))
+      
+      if total_count == 0 then
+        DebugPrint("NOTE: No QDP packets received. Possible issues:")
+        DebugPrint("  - No Q-SYS devices on this network segment")
+        DebugPrint("  - Multicast traffic is being filtered/blocked")
+        DebugPrint("  - Another application is already using port 2467")
+        DebugPrint("  - Network switch may be blocking multicast 224.0.23.175")
+      end
+    end
+    discovery_timer:Start(15)
+    DebugPrint("Discovery timer started")
+  end
+  
+  function Initialize()
+    DebugPrint("=== Plugin Initialize ===")
+    DebugPrint("Q-SYS Designer Version: " .. tostring(_VERSION))
+    DebugPrint("QDP Protocol: Listening for XML announcements on port 2467")
+    Controls.status.Value = 5 -- Compromised (gray)
+    Controls.status.String = "Ready to scan"
+    UpdateDeviceList()
+    
+    -- Add event handlers to filter controls to update list when filters change
+    for i = 1, 10 do
+      Controls.filter[i].EventHandler = function()
+        DebugPrint("Filter " .. i .. " changed: " .. Controls.filter[i].String)
+        UpdateDeviceList()
+      end
+    end
+    
+    DebugPrint("Initialization complete")
+  end
+  
+  Controls.scan.EventHandler = function()
+    DebugPrint("Scan button pressed")
+    StartDiscovery()
+  end
+  
+  Initialize()
+end
