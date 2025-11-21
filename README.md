@@ -327,4 +327,4 @@ Q-SYS, Q-SYS Designer, and related trademarks are property of QSC, LLC. This plu
 
 ---
 
-**Built with for the Q-SYS community**
+**Built for the Q-SYS community**
