@@ -2,7 +2,7 @@
 
 **Version:** 2.0  
 **Author:** Brandon Cecil  
-**Company:** Fresh AVL Co.  
+**Company:** Fresh AVLabs  
 **License:** MIT Open-Source
 
 ---
@@ -165,7 +165,7 @@ Q-SYS Designer also sends query packets (not implemented in this plugin):
 
 ```lua
 PluginInfo = {
-  Name = "Fresh AVL Co.~QSC Device Discovery",
+  Name = "Fresh AVLabs.~QSC Device Discovery",
   Version = "2.0",
   BuildVersion = "2.0.0",
   Id = "qsc.device.discovery.2.0",
@@ -719,7 +719,7 @@ end
 ```
 MIT License
 
-Copyright (c) 2025 Brandon Cecil / Fresh AVL Co.
+Copyright (c) 2025 Brandon Cecil / Fresh AVLabs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -783,7 +783,7 @@ Contributions are welcome! This is an open-source project and we encourage commu
 
 For questions, support, or collaboration:
 - **Author**: Brandon Cecil
-- **Company**: Fresh AVL Co.
+- **Company**: Fresh AVLabs
 - **GitHub**: https://github.com/bcecilpgh/QDP-Device-Discovery
 
 ### Building from Source
