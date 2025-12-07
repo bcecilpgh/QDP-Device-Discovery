@@ -281,7 +281,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### MIT License Summary
 
 ```
-Copyright (c) 2025 Brandon Cecil / Fresh AVLabs
+Copyright (c) 2025 Brandon Cecil / Fresh AV Labs
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -303,7 +303,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 ## Contact
 
 **Author**: Brandon Cecil  
-**Company**: Fresh AVL Co.  
+**Company**: Fresh AV Labs  
 **Project Link**: https://github.com/bcecilpgh/QDP-Device-Discovery
 
 ---
