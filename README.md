@@ -1,6 +1,6 @@
-# QSC Device Discovery Plugin
+# QSC Device Discovery Plugin with Browser Launch
 
-A powerful Q-SYS Designer plugin that automatically discovers and displays all Q-SYS devices on your network using the Q-SYS Discovery Protocol (QDP).
+A powerful Q-SYS Designer plugin that automatically discovers and displays all Q-SYS devices on your network using the Q-SYS Discovery Protocol (QDP), with one-click browser access to device web interfaces.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Q-SYS Designer](https://img.shields.io/badge/Q--SYS%20Designer-v9.0%2B-green.svg)](https://www.qsc.com/solutions-products/q-sys-ecosystem/q-sys-designer-software/)
@@ -12,14 +12,46 @@ A powerful Q-SYS Designer plugin that automatically discovers and displays all Q
 
 The QSC Device Discovery Plugin passively listens for Q-SYS Discovery Protocol (QDP) announcements broadcast by Q-SYS Cores, I/O Frames, and other network devices. It provides a simple interface to discover, filter, and manage Q-SYS devices on your network without requiring manual IP configuration.
 
+**NEW:** Includes automatic browser launch integration for **macOS and Windows** - open device web interfaces with a single click from Q-SYS Designer!
+
 ### Key Features
 
 - **Automatic Discovery** - Passively listens for QDP announcements on multicast address 224.0.23.175
 - **Device Information** - Displays hostname, IP address, and part number for each device
 - **Advanced Filtering** - 10 configurable filter slots to exclude unwanted devices
+- **Browser Launch** - One-click access to device web interfaces (macOS & Windows)
+- **Fast Scanning** - 5-second scan with automatic socket cleanup
 - **Real-Time Updates** - Device list updates as announcements are received
 - **Debug Logging** - Comprehensive debug output for troubleshooting
-- **Auto Timeout** - 15-second scan with automatic socket cleanup
+
+---
+
+## Quick Start
+
+### Standard Installation (Discovery Only)
+
+1. **Download** the plugin (`QSC_Device_Discovery_URL_Enhanced.qplug`)
+2. **Add to Q-SYS Designer** - Drag into your design
+3. **Scan Network** - Click the button and wait 5 seconds
+4. **View Results** - See all discovered devices
+
+### Browser Launch Installation (macOS Only)
+
+For automatic browser launching capability:
+
+1. **Download all files** from the release
+2. **Run the installer:**
+   ```bash
+   cd /path/to/downloaded/files
+   sudo ./install.sh
+   ```
+3. **Note your Mac's IP** (shown at end of install)
+4. **Configure plugin** in Q-SYS Designer:
+   - Right-click plugin → Properties
+   - Set "Mac IP Address" to your Mac's IP
+   - Click OK
+5. **Use it:**
+   - Scan Network → Select device → Click "Open Browser"
 
 ---
 
@@ -30,18 +62,42 @@ The QSC Device Discovery Plugin passively listens for Q-SYS Discovery Protocol (
 - Q-SYS Designer v9.0 or later
 - Network with multicast support (IGMP)
 - UDP port 2467 available
+- **For browser launch:** macOS with Python 3 (pre-installed) OR Windows 10/11 with PowerShell (built-in)
 
-### Steps
+### Plugin Installation
 
-1. **Download** the latest release from the [Releases](../../releases) page
-2. **Copy** `QSC_Device_Discovery.qplug` to your Q-SYS Plugins folder:
+1. **Copy** `QSC_Device_Discovery_URL_Enhanced.qplug` to your Q-SYS Plugins folder:
    - **Windows**: `%USERPROFILE%\Documents\QSC\Q-Sys Designer\Plugins`
    - **macOS**: `~/Documents/QSC/Q-Sys Designer/Plugins`
-3. **Open** Q-SYS Designer
-4. **Add** the plugin to your design:
+2. **Open** Q-SYS Designer
+3. **Add** the plugin to your design:
    - Search for "QSC Device Discovery" in the component search
    - Drag it onto your schematic
-5. **Double-click** the component to open the control panel
+4. **Double-click** the component to open the control panel
+
+### Browser Launch Installation (macOS & Windows)
+
+The browser launch feature requires a small background service on your computer.
+
+#### macOS (Automated Installation)
+
+```bash
+sudo ./install.sh
+```
+
+This installs the service to `/Library/Application Support/QSC/` and configures it to start automatically on boot.
+
+#### Windows (Simple Startup)
+
+1. **Extract files** to a folder (e.g., `C:\QSC\BrowserLauncher\`)
+2. **Double-click** `start_browser_service.bat`
+3. Service starts (no installation required!)
+
+See [WINDOWS_SETUP_INSTRUCTIONS.md](WINDOWS_SETUP_INSTRUCTIONS.md) for auto-start on boot, firewall config, and advanced options.
+
+#### Manual Installation
+
+See [SETUP_INSTRUCTIONS.md](SETUP_INSTRUCTIONS.md) (macOS) or [WINDOWS_SETUP_INSTRUCTIONS.md](WINDOWS_SETUP_INSTRUCTIONS.md) (Windows) for detailed manual installation steps.
 
 ---
 
@@ -50,13 +106,27 @@ The QSC Device Discovery Plugin passively listens for Q-SYS Discovery Protocol (
 ### Basic Discovery
 
 1. Click the **Scan Network** button
-2. Wait up to 15 seconds for discovery to complete
+2. Wait 5 seconds for discovery to complete
 3. View discovered devices in the device list
 
 Each device entry shows:
 ```
 1. device-hostname (Part-Number) - 192.168.1.100
 ```
+
+### Opening Device Web Interfaces
+
+**With Browser Launch Service (macOS or Windows):**
+
+1. **Scan** for devices
+2. **Turn the Device # knob** to select a device (URL auto-populates)
+3. **Click "Open Browser"** - Device web interface opens automatically!
+
+**Without Browser Launch Service:**
+
+1. **Scan** for devices
+2. **Turn the Device # knob** to select a device
+3. **Copy/paste** the URL from the display into your browser manually
 
 ### Using Filters
 
@@ -108,6 +178,28 @@ QDP is a method where Q-SYS devices broadcast periodic UDP packets to announce t
 
 The plugin passively listens for these announcements and parses the XML to extract device information.
 
+### Browser Launch Architecture
+
+```
+Q-SYS Designer Plugin
+        ↓
+   HTTP Request (device URL)
+        ↓
+Mac Service (localhost:8765)
+        ↓
+   macOS 'open' command
+        ↓
+  Default Browser Opens
+```
+
+The Mac service runs as a system daemon and receives HTTP requests from the Q-SYS plugin. When a request is received, it uses macOS's native `open` command to launch the device URL in your default browser.
+
+**Service Details:**
+- **Location**: `/Library/Application Support/QSC/qsys_browser_launcher.py`
+- **Auto-start**: Configured via LaunchDaemon (starts on boot)
+- **Port**: 8765 (configurable)
+- **Protocol**: HTTP GET with URL parameter
+
 ---
 
 ## Configuration
@@ -119,15 +211,20 @@ The plugin passively listens for these announcements and parses the XML to extra
 - **Port Availability**: UDP port 2467 must not be blocked or in use
 - **Firewall**: Allow UDP port 2467 inbound
 
-### Q-SYS Designer Settings
+### Plugin Properties
 
-No special configuration required. The plugin works out of the box in Q-SYS Designer.
+Right-click the plugin and select "Properties" to configure:
+
+- **Mac IP Address** - IP address of the Mac running the browser service (default: 192.168.1.100)
+- **Service Port** - Port number for the browser service (default: 8765)
 
 ---
 
 ## Troubleshooting
 
-### No Devices Discovered
+### Discovery Issues
+
+#### No Devices Discovered
 
 **Problem**: Scan completes but shows "Found 0 devices"
 
@@ -138,7 +235,7 @@ No special configuration required. The plugin works out of the box in Q-SYS Desi
 4. Confirm devices are powered on and connected
 5. Check Debug Output in Q-SYS Designer for error messages
 
-### Some Devices Missing
+#### Some Devices Missing
 
 **Problem**: Some known devices don't appear
 
@@ -148,7 +245,7 @@ No special configuration required. The plugin works out of the box in Q-SYS Desi
 3. Verify devices are on the same network segment
 4. Some older device types may not broadcast QDP
 
-### Port Already in Use
+#### Port Already in Use
 
 **Problem**: Error message "Failed to open UDP port"
 
@@ -158,6 +255,52 @@ No special configuration required. The plugin works out of the box in Q-SYS Desi
 3. Restart Q-SYS Designer
 4. Run Q-SYS Designer as administrator (Windows)
 
+### Browser Launch Issues
+
+#### Browser Doesn't Open
+
+**Test the service directly:**
+```bash
+curl "http://localhost:8765?url=http://google.com"
+```
+This should open Google in your browser.
+
+**Check if service is running:**
+```bash
+sudo launchctl list | grep qsc
+```
+Should show the service with a PID number.
+
+**View service logs:**
+```bash
+tail -f "/Library/Application Support/QSC/browser_launcher.log"
+```
+
+**Restart the service:**
+```bash
+sudo launchctl unload /Library/LaunchDaemons/com.qsc.browser-launcher.plist
+sudo launchctl load /Library/LaunchDaemons/com.qsc.browser-launcher.plist
+```
+
+#### Wrong IP Address
+
+If your Mac's IP changes (different network, DHCP renewal):
+1. Get the new IP: `ifconfig | grep "inet " | grep -v 127.0.0.1`
+2. Update the plugin properties in Q-SYS Designer
+3. No need to restart the service
+
+#### Firewall Blocking
+
+**Allow Python through firewall:**
+- System Preferences → Security & Privacy → Firewall → Firewall Options
+- Add Python to allowed apps
+
+**Or use hostname instead:**
+```bash
+hostname
+```
+Use this in plugin properties instead of IP (e.g., "brandons-macbook.local")
+
 ### Debug Logging
 
 Enable debug output: **View → Debug Output** in Q-SYS Designer
@@ -166,9 +309,67 @@ Look for messages prefixed with `[QSC Discovery]` for detailed troubleshooting i
 
 ---
 
+## Managing the Browser Service
+
+### Check Status
+```bash
+sudo launchctl list | grep qsc
+```
+
+### Stop Service
+```bash
+sudo launchctl unload /Library/LaunchDaemons/com.qsc.browser-launcher.plist
+```
+
+### Start Service
+```bash
+sudo launchctl load /Library/LaunchDaemons/com.qsc.browser-launcher.plist
+```
+
+### View Logs
+```bash
+tail -f "/Library/Application Support/QSC/browser_launcher.log"
+```
+
+### Uninstall Completely
+```bash
+sudo ./uninstall.sh
+```
+
+Or manually:
+```bash
+sudo launchctl unload /Library/LaunchDaemons/com.qsc.browser-launcher.plist
+sudo rm /Library/LaunchDaemons/com.qsc.browser-launcher.plist
+sudo rm -rf "/Library/Application Support/QSC"
+```
+
+---
+
+## Files Included
+
+**Q-SYS Plugin:**
+- **QSC_Device_Discovery_URL_Enhanced.qplug** - Q-SYS Designer plugin
+
+**macOS Browser Service:**
+- **qsys_browser_launcher.py** - Mac browser service (Python script)
+- **install.sh** - Automated installer for Mac
+- **uninstall.sh** - Automated uninstaller
+
+**Windows Browser Service:**
+- **qsys_browser_launcher_windows.py** - Windows Python service
+- **qsys_browser_launcher.ps1** - Windows PowerShell service (no install required)
+- **start_browser_service.bat** - Easy double-click launcher
+
+**Documentation:**
+- **README.md** - This file
+- **SETUP_INSTRUCTIONS.md** - Detailed macOS installation guide
+- **WINDOWS_SETUP_INSTRUCTIONS.md** - Detailed Windows installation guide
+
+---
+
 ## Technical Details
 
-### Architecture
+### Plugin Architecture
 
 ```
 Plugin (UDP Socket) → Listens on 0.0.0.0:2467
@@ -182,6 +383,12 @@ Plugin (UDP Socket) → Listens on 0.0.0.0:2467
          Update Device Registry
                     ↓
        Display in Device List
+                    ↓
+    User Selects Device (Optional)
+                    ↓
+     HTTP Request to Mac Service
+                    ↓
+        Browser Opens Device URL
 ```
 
 ### API Limitations
@@ -190,16 +397,15 @@ Plugin (UDP Socket) → Listens on 0.0.0.0:2467
 - Plugin relies on OS-level multicast handling
 - No reverse DNS lookup capability
 - Single network interface binding
+- Browser launch requires external service (security limitation)
 
-For detailed technical information, see [Technical Documentation](QSC_Device_Discovery_Technical.md).
+### Security Considerations
 
----
-
-## Documentation
-
-- **[User Manual](QSC_Device_Discovery_Manual.html)** - Comprehensive user guide
-- **[Technical Documentation](QSC_Device_Discovery_Technical.md)** - Developer documentation
-- **[LICENSE](LICENSE)** - MIT License text
+- Browser service listens on all network interfaces (0.0.0.0)
+- Any device on your network can send URLs to open
+- Service only accepts HTTP/HTTPS URLs
+- Consider firewall rules to restrict access to specific IPs
+- Service runs as system daemon (not user-level)
 
 ---
 
@@ -227,10 +433,11 @@ Contributions are welcome! This is an open-source project under the MIT License.
 
 Found a bug or have a feature request? Please open an [issue](../../issues) with:
 - Q-SYS Designer version
-- Plugin version
+- Plugin version (check PluginInfo.Version in the .qplug file)
 - Network configuration details
 - Debug log output (if applicable)
 - Steps to reproduce the issue
+- Operating system (for browser launch issues)
 
 ---
 
@@ -238,26 +445,60 @@ Found a bug or have a feature request? Please open an [issue](../../issues) with
 
 ### Planned Features
 
+- [ ] Windows browser launch support
+- [ ] Linux browser launch support
 - [ ] Active query mode (send requests to trigger responses)
 - [ ] Persistent device list (accumulate across scans)
 - [ ] CSV/JSON export functionality
 - [ ] Historical device tracking (up/down events)
 - [ ] Regex support for filters
 - [ ] Device details view (full XML data)
+- [ ] Configurable scan duration
 
 ### Future Enhancements
 
 - Network ping integration
 - Device reachability verification
 - Multi-subnet discovery support
-- Custom scan duration
 - Save/load filter presets
+- Device status monitoring
+- Alert on device offline/online
 
 ---
 
 ## Version History
 
-### v2.0 (Current)
+### v2.5 (Current)
+- **NEW:** Windows browser launch support (PowerShell & Python)
+- **NEW:** Cross-platform service architecture
+- **Removed:** "Get URL" button (redundant - knob auto-populates URL)
+- **Improved:** Cleaner user workflow (select device → open browser)
+- **Changed:** UI layout simplified
+
+### v2.4
+- **Changed:** Scan time reduced from 15 to 5 seconds
+- **Improved:** Faster network discovery
+
+### v2.3
+- **NEW:** Browser launch integration for macOS
+- **NEW:** Mac service installer and auto-startup configuration
+- Fixed hostname parsing (enhanced XML tag detection)
+- Improved fallback logic for missing hostname data
+- Enhanced debug output (500 char packet preview)
+- Added device selection controls
+- Reduced scan time from 15 to 5 seconds
+
+### v2.2
+- Added HTTP client for browser launch requests
+- Added plugin properties for Mac IP and service port
+- Added "Open Browser" button
+
+### v2.1
+- Added device selector knob
+- Added URL display field
+- Added device info display
+
+### v2.0
 - Added 10 configurable filters
 - Implemented real-time filter updates
 - Fixed continuous packet reception bug
@@ -281,7 +522,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### MIT License Summary
 
 ```
-Copyright (c) 2025 Brandon Cecil / Fresh AV Labs
+Copyright (c) 2025 Brandon Cecil / Fresh AVL Co.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -303,7 +544,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 ## Contact
 
 **Author**: Brandon Cecil  
-**Company**: Fresh AV Labs  
+**Company**: Fresh AVL Co.  
 **Project Link**: https://github.com/bcecilpgh/QDP-Device-Discovery
 
 ---
@@ -311,11 +552,19 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 ## Support
 
 If you find this plugin useful, please:
-- Star this repository
-- Report bugs via [Issues](../../issues)
-- Suggest features via [Issues](../../issues)
-- Contribute via [Pull Requests](../../pulls)
-- Share with other Q-SYS users
+-  Star this repository
+-  Report bugs via [Issues](../../issues)
+-  Suggest features via [Issues](../../issues)
+-  Contribute via [Pull Requests](../../pulls)
+-  Share with other Q-SYS users
+
+---
+
+## Acknowledgments
+
+- QSC for the Q-SYS ecosystem and comprehensive API documentation
+- The Q-SYS community for feedback and testing
+- macOS for providing the `open` command for browser integration
 
 ---
 
@@ -327,4 +576,4 @@ Q-SYS, Q-SYS Designer, and related trademarks are property of QSC, LLC. This plu
 
 ---
 
-**Built for the Q-SYS community**
+**Built with ❤️ for the Q-SYS community**
