@@ -1,6 +1,6 @@
 --[[
   QSC Device Discovery Plugin
-  Copyright (c) 2025 Brandon Cecil / Fresh AVL Co.
+  Copyright (c) 2025 Brandon Cecil / Fresh AV Labs
   
   MIT License - https://opensource.org/licenses/MIT
   
@@ -24,7 +24,7 @@
 --]]
 
 PluginInfo = {
-  Name = "Fresh AVL Co.~QSC Device Discovery URL Enhanced",
+  Name = "Fresh AV Labs.~QSC Device Discovery URL Enhanced",
   Version = "2.3",
   BuildVersion = "2.3.0",
   Id = "qsc.device.discovery.2.3 URL",
