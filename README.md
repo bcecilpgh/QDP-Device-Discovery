@@ -2,6 +2,8 @@
 
 A powerful Q-SYS Designer plugin that automatically discovers and displays all Q-SYS devices on your network using the Q-SYS Discovery Protocol (QDP).
 
+Developed for the Q-SYS community by [Fresh AV Labs](https://freshavlabs.com), makers of [Q-SYS plugins](https://freshavlabs.com/plugins/) and [embedded hardware bridges](https://freshavlabs.com/hardware/) for AV integrators.
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Q-SYS Designer](https://img.shields.io/badge/Q--SYS%20Designer-v9.0%2B-green.svg)](https://www.qsc.com/solutions-products/q-sys-ecosystem/q-sys-designer-software/)
 [![Lua](https://img.shields.io/badge/Lua-5.3-blue.svg)](https://www.lua.org/)
@@ -303,7 +305,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 ## Contact
 
 **Author**: Brandon Cecil  
-**Company**: Fresh AV Labs  
+**Company**: [Fresh AV Labs](https://freshavlabs.com)  
 **Project Link**: https://github.com/bcecilpgh/QDP-Device-Discovery
 
 ---
@@ -327,4 +329,4 @@ Q-SYS, Q-SYS Designer, and related trademarks are property of QSC, LLC. This plu
 
 ---
 
-**Built for the Q-SYS community**
+**Built for the Q-SYS community by [Fresh AV Labs](https://freshavlabs.com).** More Q-SYS plugins and hardware: [freshavlabs.com](https://freshavlabs.com)
